@@ -12,9 +12,8 @@ import android.util.AttributeSet;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.plugin.common.ActivityLifecycleListener;
-import io.flutter.plugin.common.JSONMethodCodec;
-import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
@@ -23,7 +22,7 @@ import io.flutter.view.FlutterView;
  * An Android view containing a Flutter app.
  */
 public class XFlutterView extends FlutterView
-        {
+    {
             public XFlutterView(Context context, AttributeSet attrs, FlutterNativeView nativeView){
                 super(context,attrs,nativeView);
             }
@@ -77,10 +76,14 @@ public class XFlutterView extends FlutterView
                     privateField2.setAccessible(true);
                     List<ActivityLifecycleListener> mActivityLifecycleListener = (List<ActivityLifecycleListener>)privateField2.get(this);
                     mActivityLifecycleListener.clear();
-                    PlatformPlugin platformPlugin = new PlatformPlugin(activity);
-                    MethodChannel flutterPlatformChannel = new MethodChannel(this, "flutter/platform", JSONMethodCodec.INSTANCE);
-                    flutterPlatformChannel.setMethodCallHandler(platformPlugin);
-                    addActivityLifecycleListener(platformPlugin);
+
+                    final PlatformPlugin platformPlugin = new PlatformPlugin(activity, new PlatformChannel(getFlutterNativeView().getDartExecutor()));
+                    addActivityLifecycleListener(new ActivityLifecycleListener() {
+                        @Override
+                        public void onPostResume() {
+                            platformPlugin.updateSystemUiOverlays();
+                        }
+                    });
                 } catch (NoSuchFieldException e) {
                     e.printStackTrace();
                 }

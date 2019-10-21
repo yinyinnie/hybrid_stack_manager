@@ -25,14 +25,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
+
+import java.util.ArrayList;
+
+import io.flutter.app.FlutterActivityEvents;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.util.Preconditions;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterNativeView;
+import io.flutter.view.FlutterRunArguments;
 import io.flutter.view.FlutterView;
-import java.util.ArrayList;
-import io.flutter.app.FlutterActivityEvents;
 
 /**
  * Class that performs the actual work of tying Android {@link Activity}
@@ -172,7 +175,12 @@ public final class XFlutterActivityDelegate
         }
         String appBundlePath = FlutterMain.findAppBundlePath(activity.getApplicationContext());
         if (appBundlePath != null) {
-            flutterView.runFromBundle(appBundlePath, null, "main", reuseIsolate);
+//            flutterView.runFromBundle(appBundlePath, null, "main", reuseIsolate);
+            FlutterRunArguments runArguments = new FlutterRunArguments();
+            runArguments.bundlePath = appBundlePath;
+            runArguments.entrypoint = "main";
+            runArguments.libraryPath = null;
+            flutterView.runFromBundle(runArguments);
         }
     }
 
@@ -342,7 +350,12 @@ public final class XFlutterActivityDelegate
             if (route != null) {
                 flutterView.setInitialRoute(route);
             }
-            flutterView.runFromBundle(appBundlePath, intent.getStringExtra("snapshot"), "main", reuseIsolate);
+//            flutterView.runFromBundle(appBundlePath, intent.getStringExtra("snapshot"), "main", reuseIsolate);
+            FlutterRunArguments args = new FlutterRunArguments();
+            args.bundlePath = appBundlePath;
+            args.entrypoint = "main";
+            args.libraryPath = intent.getStringExtra("snapshot");
+            flutterView.runFromBundle(args);
             return true;
         }
 
@@ -365,7 +378,7 @@ public final class XFlutterActivityDelegate
         }
         final View view = new View(activity);
         view.setLayoutParams(matchParent);
-        view.setBackground(launchScreenDrawable);
+        view.setBackgroundDrawable(launchScreenDrawable);
         return view;
     }
 
@@ -406,7 +419,7 @@ public final class XFlutterActivityDelegate
         try {
             ActivityInfo activityInfo = activity.getPackageManager().getActivityInfo(
                     activity.getComponentName(),
-                    PackageManager.GET_META_DATA|PackageManager.GET_ACTIVITIES);
+                    PackageManager.GET_META_DATA | PackageManager.GET_ACTIVITIES);
             Bundle metadata = activityInfo.metaData;
             return metadata != null && metadata.getBoolean(SPLASH_SCREEN_META_DATA_KEY);
         } catch (NameNotFoundException e) {
