@@ -24,7 +24,7 @@ class XMaterialPageRoute<T> extends MaterialPageRoute<T> {
 class Router extends Object {
   static final Router singleton = new Router._internal();
   List<XMaterialPageRoute> flutterRootPageNameLst = new List();
-  String currentPageUrl = null;
+  String currentPageUrl;
   FlutterWidgetHandler routerWidgetHandler;
   GlobalKey globalKeyForRouter;
   static Router sharedInstance() {
@@ -33,6 +33,7 @@ class Router extends Object {
 
   Router._internal() {
     HybridStackManagerPlugin.hybridStackManagerPlugin
+        // ignore: missing_return
         .setMethodCallHandler((MethodCall methodCall) {
       String method = methodCall.method;
       if (method == "openURLFromFlutter") {
